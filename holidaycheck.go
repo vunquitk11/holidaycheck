@@ -31,3 +31,21 @@ func IsTodayPublicHoliday(countryCode string, todayUTC time.Time) (bool, error) 
 	}
 	return false, nil
 }
+
+// GetHolidayName returns the holiday name for the given country code and date (UTC).
+// If the date is not a public holiday, it returns an empty string.
+func GetHolidayName(countryCode string, todayUTC time.Time) (string, error) {
+	enumCountryCode := models.CountryCode(countryCode)
+	if !enumCountryCode.IsValid() {
+		return "", fmt.Errorf("invalid country code: %v", countryCode)
+	}
+	year, monthDate, err := enumCountryCode.ToLocalYearAndDate(todayUTC)
+	if err != nil {
+		return "", fmt.Errorf("error converting to local time: %v", err)
+	}
+	holidayName, exists := data.Holidays[year][enumCountryCode][monthDate]
+	if exists {
+		return holidayName, nil
+	}
+	return "", nil
+}

@@ -82,3 +82,52 @@ func Test_IsTodayPublicHoliday(t *testing.T) {
 		})
 	}
 }
+
+func Test_GetHolidayName(t *testing.T) {
+	// Define test cases
+	testCases := []struct {
+		countryCode string
+		date        string
+		expected    string
+		name        string
+		expectError bool
+	}{
+		// Singapore test cases
+		{"SG", "2025-01-01", "New Year's Day", "SG New Year's Day", false},
+		{"SG", "2025-08-09", "National Day", "SG National Day", false},
+		// Vietnam test cases
+		{"VN", "2025-01-01", "New Year's Day", "VN New Year's Day", false},
+		{"VN", "2025-09-02", "National Day", "VN National Day", false},
+		// Indonesia test cases
+		{"ID", "2025-01-01", "New Year's Day", "ID New Year's Day", false},
+		{"ID", "2025-08-17", "Independence Day", "ID Independence Day", false},
+		// Malaysia test cases
+		{"MY", "2025-01-01", "New Year's Day", "MY New Year's Day", false},
+		{"MY", "2025-08-31", "National Day (Merdeka)", "MY National Day", false},
+		// Error test cases
+		{"INVALID", "2025-01-01", "", "Invalid country code", true},
+		// Empty result test cases
+		{"SG", "2025-07-04", "", "SG Not a holiday", false},
+		{"VN", "2025-06-15", "", "VN Not a holiday", false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			date, _ := time.Parse("2006-01-02", tc.date)
+			holidayName, err := GetHolidayName(tc.countryCode, date)
+
+			if tc.expectError {
+				if err == nil {
+					t.Errorf("expected error, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+				}
+				if holidayName != tc.expected {
+					t.Errorf("expected %v, got %v", tc.expected, holidayName)
+				}
+			}
+		})
+	}
+}
